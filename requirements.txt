@@ -1,0 +1,9 @@
+streamlit==1.44.1
+streamlit-ace==0.1.1
+duckdb==1.2.2
+python-dotenv==1.1.0
+langchain==0.3.24
+langchain-openai==0.3.14
+langchain-community==0.3.22
+ollama==0.4.8
+sqlglot==26.16.2
