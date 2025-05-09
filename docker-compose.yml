@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  api:
-    container_name: api
+  backend:
+    container_name: backend
     build:
-      context: .
-      dockerfile: Dockerfile.api
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     env_file:
@@ -18,17 +18,17 @@ services:
       timeout: 10s
       retries: 3
 
-  react-app:
-    container_name: react-app
+  frontend:
+    container_name: frontend
     build:
-      context: ./react-app
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "3000:80"
     env_file:
       - .env
     depends_on:
-      - api
+      - backend
 
   ollama:
     image: ollama/ollama

@@ -3,6 +3,9 @@ import axios from 'axios';
 // For development, use absolute URL with the API port
 const API_BASE_URL = "http://localhost:8000";
 
+// For production in Docker, you can use the service name
+// const API_BASE_URL = "http://backend:8000";
+
 const api = {
   // Get available providers
   getProviders: async () => {
