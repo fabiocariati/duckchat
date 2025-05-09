@@ -18,17 +18,15 @@ services:
       timeout: 10s
       retries: 3
 
-  app:
-    container_name: app
+  react-app:
+    container_name: react-app
     build:
-      context: .
-      dockerfile: Dockerfile.app
+      context: ./react-app
+      dockerfile: Dockerfile
     ports:
-      - "8501:8501"
+      - "3000:80"
     env_file:
       - .env
-    volumes:
-      - ./duckchat:/app/duckchat
     depends_on:
       - api
 
