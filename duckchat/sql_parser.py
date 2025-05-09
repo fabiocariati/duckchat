@@ -2,6 +2,7 @@ import re
 import sqlglot
 from langchain_core.output_parsers import BaseOutputParser
 
+
 class SQLOutputParser(BaseOutputParser):
     def parse(self, text):
         match = re.search(r"```sql([\s\S]*?)```", text)
@@ -38,4 +39,4 @@ class SQLOutputParser(BaseOutputParser):
         match = pattern.search(clean_sql)
         if match:
             return clean_sql[match.start():].strip()
-        return clean_sql 
+        return clean_sql

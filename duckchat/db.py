@@ -5,9 +5,10 @@ from pathlib import Path
 import duckdb
 from typing import Dict, List, Tuple, Any
 
+
 class DuckDBController:
     SUPPORTED_FILE_TYPES = ["csv", "parquet"]
-    
+
     def __init__(self, database=':memory:', read_only=False):
         self.con = duckdb.connect(database=database, read_only=read_only)
         self.tables: Dict[str, Dict[str, Any]] = {}
@@ -107,4 +108,4 @@ class DuckDBController:
 
     def close(self):
         """Close the DuckDB connection."""
-        self.con.close() 
+        self.con.close()

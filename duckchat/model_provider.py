@@ -4,7 +4,9 @@ from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 import ollama
 
+
 load_dotenv()
+
 
 class ModelProviderController:
     PROVIDERS = {
@@ -38,4 +40,4 @@ class ModelProviderController:
         return provider["chat_class"](**provider["params"], temperature=0.1)
     
     def get_models(self):
-        return self.PROVIDERS[self.provider]["models"] 
+        return self.PROVIDERS[self.provider]["models"]

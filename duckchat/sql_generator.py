@@ -7,6 +7,7 @@ from langchain_core.prompts import (
 from .model_provider import ModelProviderController
 from .sql_parser import SQLOutputParser
 
+
 class SQLGenerator:
     def __init__(self, provider_controller: ModelProviderController):
         self.provider_controller = provider_controller
@@ -56,4 +57,5 @@ class SQLGenerator:
         if not generated_sql.lower().startswith(("select", "with")):
             raise Exception(f"Generated SQL seems invalid: {generated_sql}")
             
-        return generated_sql 
+        return generated_sql
+
