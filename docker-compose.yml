@@ -1,16 +1,36 @@
 version: '3.8'
 
 services:
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./duckchat:/app/duckchat
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/providers"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   app:
-    build: .
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile.app
     ports:
       - "8501:8501"
-    depends_on:
-      - ollama
+    env_file:
+      - .env
     volumes:
-      - .:/app
-    environment:
-      - OLLAMA_HOST=http://ollama:11434
+      - ./duckchat:/app/duckchat
+    depends_on:
+      - api
 
   ollama:
     image: ollama/ollama
