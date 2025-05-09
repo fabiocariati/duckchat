@@ -1,18 +1,13 @@
-import duckdb
 import streamlit as st
 from streamlit_ace import st_ace
-
 
 from duckchat.utils import (
     ModelProviderController,
     prompt_to_sql,
-    register_file_as_table,
-    get_table_schema,
-    get_table_ddl,
-    get_table_sample,
     supported_files,
     openai_api_key
 )
+from duckchat.db import DuckDBController
 
 
 def close_edit_chat():
@@ -43,8 +38,8 @@ def render_assistent_message(i, msg):
             with col1:
                 if st.button("Confirm SQL edit", key=f"confirm_sql_edit_{i}"):
                     try:
-                        con = st.session_state["con"]
-                        new_df = con.execute(edited_sql).fetchdf()
+                        db_controller = st.session_state["db_controller"]
+                        new_df = db_controller.execute_query(edited_sql)
                         st.session_state["messages"] = st.session_state["messages"][:i]
                         st.session_state["messages"].append({
                             "role": "assistant",
@@ -88,6 +83,7 @@ def render_user_message(i, msg):
 
 def render_chat():
     provider_controller = st.session_state["model_provider_controller"]
+    db_controller = st.session_state["db_controller"]
 
     for i, msg in enumerate(st.session_state["messages"]):
         with st.chat_message(msg["role"]):
@@ -115,7 +111,7 @@ def render_chat():
                     st.code(generated_sql, language="sql")
 
                     with st.spinner("⚡ Executing SQL query..."):
-                        result_df = st.session_state["con"].execute(generated_sql).fetchdf()
+                        result_df = db_controller.execute_query(generated_sql)
                         st.dataframe(result_df)
 
                     st.session_state["messages"].append(
@@ -148,19 +144,12 @@ def render_side_bar():
         type=supported_files,
         accept_multiple_files=True
     )
-    con = st.session_state["con"]
+    db_controller = st.session_state["db_controller"]
     for uploaded_file in uploaded_files:
         if uploaded_file.name not in st.session_state["tables"]:
             with st.spinner(f"Registering '{uploaded_file.name}'..."):
-                table_name = register_file_as_table(con, uploaded_file)
-                table_schema = get_table_schema (con, table_name)
-                st.session_state["tables"][uploaded_file.name] = {
-                    "table_name": table_name,
-                    "columns": [n[1] for n in table_schema],
-                    "schema": table_schema,
-                    "ddl": get_table_ddl(con, table_name),
-                    "sample": get_table_sample(con, table_name)
-                }
+                table_name = db_controller.register_file_as_table(uploaded_file)
+                st.session_state["tables"] = db_controller.tables
 
     st.sidebar.title("📊 Tables")
     for _, details in st.session_state["tables"].items():
@@ -177,7 +166,7 @@ def session_state_defaults(defaults):
 
 def render_app():
     session_state_defaults({
-        "con": duckdb.connect(database=':memory:', read_only=False),
+        "db_controller": DuckDBController(database=':memory:', read_only=False),
         "model_provider_controller": ModelProviderController(),
         "edit_index": None,
         "edit_text": "",
