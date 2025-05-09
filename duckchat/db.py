@@ -6,6 +6,8 @@ import duckdb
 from typing import Dict, List, Tuple, Any
 
 class DuckDBController:
+    SUPPORTED_FILE_TYPES = ["csv", "parquet"]
+    
     def __init__(self, database=':memory:', read_only=False):
         self.con = duckdb.connect(database=database, read_only=read_only)
         self.tables: Dict[str, Dict[str, Any]] = {}

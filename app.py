@@ -1,13 +1,11 @@
 import streamlit as st
 from streamlit_ace import st_ace
 
-from duckchat.utils import (
+from duckchat import (
     ModelProviderController,
-    prompt_to_sql,
-    supported_files,
-    openai_api_key
+    SQLGenerator,
+    DuckDBController
 )
-from duckchat.db import DuckDBController
 
 
 def close_edit_chat():
@@ -84,6 +82,7 @@ def render_user_message(i, msg):
 def render_chat():
     provider_controller = st.session_state["model_provider_controller"]
     db_controller = st.session_state["db_controller"]
+    sql_generator = st.session_state["sql_generator"]
 
     for i, msg in enumerate(st.session_state["messages"]):
         with st.chat_message(msg["role"]):
@@ -107,7 +106,7 @@ def render_chat():
             with st.spinner(f"🧠 Generating SQL"):
                 try:
                     tables = st.session_state["tables"]
-                    generated_sql = prompt_to_sql(prompt, tables, provider_controller)
+                    generated_sql = sql_generator.generate_sql(prompt, tables)
                     st.code(generated_sql, language="sql")
 
                     with st.spinner("⚡ Executing SQL query..."):
@@ -129,11 +128,12 @@ def render_chat():
 def render_side_bar():
     st.sidebar.header("⚙️ Settings")
     provider_controller = st.session_state["model_provider_controller"]
+    db_controller = st.session_state["db_controller"]
     provider_controller.provider = st.sidebar.selectbox("Provider", provider_controller.get_providers(), index=0)
     model = st.sidebar.selectbox("Model", options=provider_controller.get_models(), index=0)
     provider_controller.add_parameter("model", model)
     if provider_controller.provider == "openai":
-        api_key = st.sidebar.text_input("API Key", value=openai_api_key, type="password")
+        api_key = st.sidebar.text_input("API Key", value=provider_controller.OPENAI_API_KEY, type="password")
         provider_controller.add_parameter("api_key", api_key)
     elif provider_controller.provider == "ollama" and provider_controller.get_models() == []:
         st.sidebar.error("No models found. Please add a model: `docker exec -it ollama ollama pull llama3:8b`")
@@ -141,7 +141,7 @@ def render_side_bar():
     st.sidebar.header("📂 Files")
     uploaded_files = st.sidebar.file_uploader(
         "Upload one or more CSV or Parquet files",
-        type=supported_files,
+        type=db_controller.SUPPORTED_FILE_TYPES,
         accept_multiple_files=True
     )
     db_controller = st.session_state["db_controller"]
@@ -165,9 +165,11 @@ def session_state_defaults(defaults):
 
 
 def render_app():
+    provider_controller = ModelProviderController()
     session_state_defaults({
         "db_controller": DuckDBController(database=':memory:', read_only=False),
-        "model_provider_controller": ModelProviderController(),
+        "model_provider_controller": provider_controller,
+        "sql_generator": SQLGenerator(provider_controller),
         "edit_index": None,
         "edit_text": "",
         "messages": [],
