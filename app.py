@@ -80,7 +80,6 @@ def render_user_message(i, msg):
 
 
 def render_chat():
-    provider_controller = st.session_state["model_provider_controller"]
     db_controller = st.session_state["db_controller"]
     sql_generator = st.session_state["sql_generator"]
 
@@ -129,6 +128,7 @@ def render_side_bar():
     st.sidebar.header("⚙️ Settings")
     provider_controller = st.session_state["model_provider_controller"]
     db_controller = st.session_state["db_controller"]
+
     provider_controller.provider = st.sidebar.selectbox("Provider", provider_controller.get_providers(), index=0)
     model = st.sidebar.selectbox("Model", options=provider_controller.get_models(), index=0)
     provider_controller.add_parameter("model", model)
@@ -144,7 +144,7 @@ def render_side_bar():
         type=db_controller.SUPPORTED_FILE_TYPES,
         accept_multiple_files=True
     )
-    db_controller = st.session_state["db_controller"]
+
     for uploaded_file in uploaded_files:
         if uploaded_file.name not in st.session_state["tables"]:
             with st.spinner(f"Registering '{uploaded_file.name}'..."):
