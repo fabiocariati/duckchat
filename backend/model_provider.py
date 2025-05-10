@@ -16,7 +16,7 @@ class ModelProviderController:
             "params": {"base_url": os.getenv("OLLAMA_HOST")},
         },
         "openai": {
-            "models": ["gpt-3.5-turbo", "gpt-4", "gpt-4o", "gpt-4-turbo" ],
+            "models": ["gpt-3.5-turbo", "gpt-4", "gpt-4o", "gpt-4-turbo"],
             "chat_class": ChatOpenAI,
             "params": {},
         },
@@ -36,8 +36,9 @@ class ModelProviderController:
     def get_chat(self):
         provider = self.PROVIDERS[self.provider]
         if provider == "openai" and not provider["params"].get("api_key"):
-            raise ValueError("API key is required for OpenAI provider. Please set it.")
+            raise ValueError(
+                "API key is required for OpenAI provider. Please set it.")
         return provider["chat_class"](**provider["params"], temperature=0.1)
-    
+
     def get_models(self):
         return self.PROVIDERS[self.provider]["models"]

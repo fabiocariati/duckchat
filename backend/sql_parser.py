@@ -18,9 +18,11 @@ class SQLOutputParser(BaseOutputParser):
         if not query:
             raise ValueError("No SQL query output provided.")
 
-        pattern = re.compile(rf"^\s*({'|'.join(valid_commands)})\b", re.IGNORECASE)
+        pattern = re.compile(
+            rf"^\s*({'|'.join(valid_commands)})\b", re.IGNORECASE)
         if not pattern.match(query):
-            raise ValueError(f"Output does not look like a valid SQL query: {query}")
+            raise ValueError(
+                f"Output does not look like a valid SQL query: {query}")
 
         return sqlglot.transpile(query, write="duckdb", pretty=True)[0]
 

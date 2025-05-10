@@ -43,19 +43,19 @@ class SQLGenerator:
         """Generate SQL query from user prompt using the available tables."""
         prompt_template = ChatPromptTemplate.from_messages([
             SystemMessagePromptTemplate.from_template(self.system_template),
-            HumanMessagePromptTemplate.from_template(f"{user_prompt} Respond with SQL")
+            HumanMessagePromptTemplate.from_template(
+                f"{user_prompt} Respond with SQL")
         ])
-        
+
         input_vars = {
             "tables_info": self._format_tables_info(tables),
             "user_prompt": user_prompt,
         }
-        
+
         chain = prompt_template | self.provider_controller.get_chat() | SQLOutputParser()
         generated_sql = chain.invoke(input_vars)
-        
+
         if not generated_sql.lower().startswith(("select", "with")):
             raise Exception(f"Generated SQL seems invalid: {generated_sql}")
-            
-        return generated_sql
 
+        return generated_sql

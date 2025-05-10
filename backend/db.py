@@ -22,7 +22,8 @@ class DuckDBController:
             tmp_path = tmp.name
 
         table_name = self._filename_to_table_name(file.name)
-        source_fn_mapper = {".csv": "read_csv_auto", ".parquet": "read_parquet"}
+        source_fn_mapper = {".csv": "read_csv_auto",
+                            ".parquet": "read_parquet"}
 
         try:
             if suffix not in [f".{ext}" for ext in ["csv", "parquet"]]:
@@ -49,7 +50,8 @@ class DuckDBController:
 
     def get_table_schema(self, table_name: str) -> List[Tuple]:
         """Get the schema of a table."""
-        schema_result = self.con.execute(f"PRAGMA table_info('{table_name}')").fetchall()
+        schema_result = self.con.execute(
+            f"PRAGMA table_info('{table_name}')").fetchall()
         if not schema_result:
             raise Exception(
                 f"Could not retrieve schema for table '{table_name}'. Please check the file."
@@ -82,11 +84,13 @@ class DuckDBController:
 
     def get_table_sample(self, table_name: str, sample_size: int = 3) -> str:
         """Get a sample of rows from a table."""
-        result = self.con.execute(f"SELECT * FROM {table_name} USING SAMPLE {sample_size} ROWS")
+        result = self.con.execute(
+            f"SELECT * FROM {table_name} USING SAMPLE {sample_size} ROWS")
         columns = [desc[0] for desc in result.description]
         rows = result.fetchall()
         if not rows:
-            raise Exception(f"Could not retrieve sample from table '{table_name}'. Please check the file.")
+            raise Exception(
+                f"Could not retrieve sample from table '{table_name}'. Please check the file.")
         csv_lines = [",".join(columns)]
         for row in rows:
             row_str = ",".join(map(str, row))
