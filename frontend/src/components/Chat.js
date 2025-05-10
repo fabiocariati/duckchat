@@ -20,6 +20,57 @@ const Chat = ({ state, setState }) => {
     }
   }, [state.messages]);
 
+  // When rerunPrompt changes, execute the query
+  useEffect(() => {
+    if (state.rerunPrompt) {
+      // Execute the query with the edited prompt
+      const executeEditedPrompt = async () => {
+        setLoading(true);
+        try {
+          const result = await api.executeQuery(
+            state.rerunPrompt,
+            state.provider,
+            state.model,
+            state.apiKey
+          );
+          
+          // Add assistant response
+          setState(prevState => ({
+            ...prevState,
+            messages: [
+              ...prevState.messages,
+              {
+                role: 'assistant',
+                content: 'Result of the edited prompt:',
+                sql: result.sql,
+                dataframe: result.dataframe
+              }
+            ],
+            rerunPrompt: null
+          }));
+        } catch (error) {
+          console.error("Error executing query:", error);
+          setState(prevState => ({
+            ...prevState,
+            messages: [
+              ...prevState.messages,
+              {
+                role: 'assistant',
+                content: `Error: ${error.message || 'Failed to execute query'}`,
+                type: 'error'
+              }
+            ],
+            rerunPrompt: null
+          }));
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      executeEditedPrompt();
+    }
+  }, [state.rerunPrompt, state.provider, state.model, state.apiKey]);
+
   const closeEditChat = () => {
     setState({
       ...state,
@@ -91,6 +142,7 @@ const Chat = ({ state, setState }) => {
   const handleEditSql = async (index, editedSql) => {
     try {
       setLoading(true);
+      // Send the SQL directly as the query
       const result = await api.executeQuery(
         editedSql,
         state.provider,
@@ -98,21 +150,22 @@ const Chat = ({ state, setState }) => {
         state.apiKey
       );
       
-      // Replace messages up to this point and add new result
+      // Update the current message with new results instead of replacing all messages
+      const updatedMessages = [...state.messages];
+      updatedMessages[index] = {
+        role: 'assistant',
+        content: 'Result of the edited SQL:',
+        sql: editedSql,  // Use the edited SQL directly
+        dataframe: result.dataframe
+      };
+      
       setState({
         ...state,
-        messages: [
-          ...state.messages.slice(0, index),
-          {
-            role: 'assistant',
-            content: 'Result of the edited SQL:',
-            sql: result.sql,
-            dataframe: result.dataframe
-          }
-        ]
+        messages: updatedMessages,
+        editIndex: null,
+        editText: ""
       });
       
-      closeEditChat();
     } catch (error) {
       console.error("Error executing edited SQL:", error);
       alert(`Error executing SQL: ${error.message}`);
@@ -130,16 +183,25 @@ const Chat = ({ state, setState }) => {
   };
 
   const handleConfirmEdit = (index, newContent) => {
-    // For user messages, we'll replace the content and regenerate the response
-    const messages = [...state.messages.slice(0, index)];
-    messages[index - 1] = { ...messages[index - 1], content: newContent };
+    // Create a copy of all messages
+    const updatedMessages = [...state.messages];
+    
+    // Update the edited message content
+    updatedMessages[index] = { 
+      ...updatedMessages[index], 
+      content: newContent 
+    };
+    
+    // If this is a user message that has a response, we need to regenerate the response
+    const isUserMessage = updatedMessages[index].role === 'user';
     
     setState({
       ...state,
-      messages,
+      messages: updatedMessages,
       editIndex: null,
       editText: "",
-      rerunPrompt: newContent
+      // Set rerunPrompt if this is a user message that needs a new response
+      rerunPrompt: isUserMessage ? newContent : null
     });
   };
 

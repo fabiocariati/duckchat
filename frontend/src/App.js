@@ -11,7 +11,8 @@ function App() {
     tables: {},
     provider: null,
     model: null,
-    apiKey: null
+    apiKey: null,
+    rerunPrompt: null
   });
 
   return (
