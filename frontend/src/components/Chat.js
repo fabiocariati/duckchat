@@ -12,6 +12,8 @@ const Chat = ({ state, setState }) => {
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef(null);
+  // Keep track of the message index to edit next
+  const [pendingEdit, setPendingEdit] = useState(null);
 
   // Scroll to the bottom when messages change
   useEffect(() => {
@@ -22,7 +24,7 @@ const Chat = ({ state, setState }) => {
 
   // When rerunPrompt changes, execute the query
   useEffect(() => {
-    if (state.rerunPrompt) {
+    if (state.rerunPrompt && pendingEdit !== null) {
       // Execute the query with the edited prompt
       const executeEditedPrompt = async () => {
         setLoading(true);
@@ -34,34 +36,53 @@ const Chat = ({ state, setState }) => {
             state.apiKey
           );
           
-          // Add assistant response
+          // Update the response message instead of adding a new one
+          const updatedMessages = [...state.messages];
+          // If there's a next message (the response), update it
+          if (pendingEdit + 1 < updatedMessages.length) {
+            updatedMessages[pendingEdit + 1] = {
+              role: 'assistant',
+              content: 'Result of the edited prompt:',
+              sql: result.sql,
+              dataframe: result.dataframe
+            };
+          }
+          
           setState(prevState => ({
             ...prevState,
-            messages: [
-              ...prevState.messages,
-              {
-                role: 'assistant',
-                content: 'Result of the edited prompt:',
-                sql: result.sql,
-                dataframe: result.dataframe
-              }
-            ],
+            messages: updatedMessages,
             rerunPrompt: null
           }));
+          
+          // Reset pending edit
+          setPendingEdit(null);
         } catch (error) {
           console.error("Error executing query:", error);
+          
+          // Update the error message or add a new one if necessary
+          const updatedMessages = [...state.messages];
+          if (pendingEdit + 1 < updatedMessages.length) {
+            updatedMessages[pendingEdit + 1] = {
+              role: 'assistant',
+              content: `Error: ${error.message || 'Failed to execute query'}`,
+              type: 'error'
+            };
+          } else {
+            updatedMessages.push({
+              role: 'assistant',
+              content: `Error: ${error.message || 'Failed to execute query'}`,
+              type: 'error'
+            });
+          }
+          
           setState(prevState => ({
             ...prevState,
-            messages: [
-              ...prevState.messages,
-              {
-                role: 'assistant',
-                content: `Error: ${error.message || 'Failed to execute query'}`,
-                type: 'error'
-              }
-            ],
+            messages: updatedMessages,
             rerunPrompt: null
           }));
+          
+          // Reset pending edit
+          setPendingEdit(null);
         } finally {
           setLoading(false);
         }
@@ -69,7 +90,7 @@ const Chat = ({ state, setState }) => {
       
       executeEditedPrompt();
     }
-  }, [state.rerunPrompt, state.provider, state.model, state.apiKey]);
+  }, [state.rerunPrompt, state.provider, state.model, state.apiKey, state.messages, pendingEdit]);
 
   const closeEditChat = () => {
     setState({
@@ -142,7 +163,7 @@ const Chat = ({ state, setState }) => {
   const handleEditSql = async (index, editedSql) => {
     try {
       setLoading(true);
-      // Send the SQL directly as the query
+      // Execute the edited SQL
       const result = await api.executeQuery(
         editedSql,
         state.provider,
@@ -195,14 +216,26 @@ const Chat = ({ state, setState }) => {
     // If this is a user message that has a response, we need to regenerate the response
     const isUserMessage = updatedMessages[index].role === 'user';
     
-    setState({
-      ...state,
-      messages: updatedMessages,
-      editIndex: null,
-      editText: "",
-      // Set rerunPrompt if this is a user message that needs a new response
-      rerunPrompt: isUserMessage ? newContent : null
-    });
+    if (isUserMessage && index + 1 < updatedMessages.length) {
+      // Store the index of the user message that was edited
+      setPendingEdit(index);
+      
+      setState({
+        ...state,
+        messages: updatedMessages,
+        editIndex: null,
+        editText: "",
+        rerunPrompt: newContent
+      });
+    } else {
+      // For other messages or if there's no next message
+      setState({
+        ...state,
+        messages: updatedMessages,
+        editIndex: null,
+        editText: ""
+      });
+    }
   };
 
   return (

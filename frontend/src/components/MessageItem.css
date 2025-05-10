@@ -97,9 +97,26 @@
 }
 
 .sql-editor {
-  margin-top: 10px;
-  width: 100%;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cm-editor {
   border: 1px solid #dee2e6;
   border-radius: 4px;
   overflow: hidden;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* Make SQL syntax highlighting more readable */
+.cm-content {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Style for active line */
+.cm-activeLine {
+  background-color: rgba(24, 144, 255, 0.05) !important;
 } 

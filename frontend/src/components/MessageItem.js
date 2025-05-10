@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import AceEditor from 'react-ace';
+import CodeMirror from '@uiw/react-codemirror';
+import { sql } from '@codemirror/lang-sql';
+import { githubLight } from '@uiw/codemirror-theme-github';
 import './MessageItem.css';
-
-// Import required Ace editor modes and themes
-import 'ace-builds/src-noconflict/mode-sql';
-import 'ace-builds/src-noconflict/theme-xcode';
 
 const MessageItem = ({
   index,
@@ -80,25 +78,21 @@ const MessageItem = ({
                 </div>
               ) : (
                 <div className="sql-editor">
-                  <AceEditor
-                    mode="sql"
-                    theme="xcode"
-                    name={`sql-editor-${index}`}
+                  <CodeMirror
                     value={editedSql || message.sql}
                     onChange={setEditedSql}
-                    fontSize={14}
-                    width="100%"
                     height="200px"
-                    showPrintMargin={false}
-                    showGutter={true}
-                    highlightActiveLine={true}
-                    setOptions={{
-                      enableBasicAutocompletion: true,
-                      enableLiveAutocompletion: true,
-                      enableSnippets: false,
-                      showLineNumbers: true,
-                      tabSize: 2,
+                    extensions={[sql()]}
+                    theme={githubLight}
+                    basicSetup={{
+                      lineNumbers: true,
+                      highlightActiveLine: true,
+                      highlightSelectionMatches: true,
+                      autocompletion: true,
+                      foldGutter: true,
+                      indentOnInput: true,
                     }}
+                    style={{ fontSize: '14px' }}
                   />
                   <div className="edit-actions">
                     <button onClick={() => onEditSql(index, editedSql || message.sql)}>
