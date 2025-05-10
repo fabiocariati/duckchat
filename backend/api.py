@@ -7,11 +7,10 @@ import duckdb
 import tempfile
 import os
 
-from duckchat import (
-    ModelProviderController,
-    SQLGenerator,
-    DuckDBController
-)
+# Update imports to use local modules
+from model_provider import ModelProviderController
+from sql_generator import SQLGenerator
+from db import DuckDBController
 
 app = FastAPI()
 

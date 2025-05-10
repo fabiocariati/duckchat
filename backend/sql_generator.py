@@ -4,8 +4,8 @@ from langchain_core.prompts import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from .model_provider import ModelProviderController
-from .sql_parser import SQLOutputParser
+from model_provider import ModelProviderController
+from sql_parser import SQLOutputParser
 
 
 class SQLGenerator:
