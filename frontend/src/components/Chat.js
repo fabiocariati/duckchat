@@ -242,16 +242,19 @@ const Chat = ({ state, setState }) => {
     <div className="chat-container">
       <div className="chat-messages">
         {state.messages.map((msg, i) => (
-          <MessageItem
-            key={i}
-            index={i}
-            message={msg}
-            state={state}
-            onEditMessage={handleEditMessage}
-            onConfirmEdit={handleConfirmEdit}
-            onEditSql={handleEditSql}
-            closeEditChat={closeEditChat}
-          />
+          <div key={i} className={`message-group ${msg.role}`}>
+            <div className="message-content">
+              <MessageItem
+                index={i}
+                message={msg}
+                state={state}
+                onEditMessage={handleEditMessage}
+                onConfirmEdit={handleConfirmEdit}
+                onEditSql={handleEditSql}
+                closeEditChat={closeEditChat}
+              />
+            </div>
+          </div>
         ))}
         {loading && (
           <div className="loading-message">
@@ -263,16 +266,18 @@ const Chat = ({ state, setState }) => {
       </div>
       
       <form className="chat-input" onSubmit={handleSendMessage}>
-        <input
-          type="text"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Enter your data query"
-          disabled={loading}
-        />
-        <button type="submit" disabled={loading || !prompt.trim()}>
-          Send
-        </button>
+        <div className="chat-input-container">
+          <input
+            type="text"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Enter your data query"
+            disabled={loading}
+          />
+          <button type="submit" disabled={loading || !prompt.trim()}>
+            Send
+          </button>
+        </div>
       </form>
     </div>
   );
