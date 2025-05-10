@@ -93,7 +93,12 @@
 .dataframe-container {
   margin-top: 15px;
   width: 100%;
-  overflow-x: auto;
+  min-height: 200px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: white;
 }
 
 .sql-editor {
@@ -119,4 +124,23 @@
 /* Style for active line */
 .cm-activeLine {
   background-color: rgba(24, 144, 255, 0.05) !important;
-} 
+}
+
+/* Remove old table styles since we're using DataGrid now */
+/* .dataframe {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.dataframe th,
+.dataframe td {
+  padding: 8px;
+  border: 1px solid #dee2e6;
+  text-align: left;
+}
+
+.dataframe th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+} */ 
