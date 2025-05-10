@@ -1,6 +1,6 @@
 # DuckChat
 
-DuckChat is an interactive data analysis application built with Streamlit that allows you to analyze your data using natural language. It leverages DuckDB for efficient data processing and supports multiple LLM providers (Ollama and OpenAI) to convert your natural language queries into SQL.
+DuckChat is an interactive data analysis application that allows you to analyze your data using natural language. It leverages DuckDB for efficient data processing and supports multiple LLM providers (Ollama and OpenAI) to convert your natural language queries into SQL.
 
 ![demo](./assets/demo.gif)
 
